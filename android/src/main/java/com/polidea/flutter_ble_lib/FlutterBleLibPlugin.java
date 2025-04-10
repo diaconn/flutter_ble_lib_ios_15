@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.polidea.flutter_ble_lib.constant.ArgumentKey;
 import com.polidea.flutter_ble_lib.constant.ChannelName;
 import com.polidea.flutter_ble_lib.constant.MethodName;
@@ -13,8 +15,8 @@ import com.polidea.flutter_ble_lib.delegate.CharacteristicsDelegate;
 import com.polidea.flutter_ble_lib.delegate.DescriptorsDelegate;
 import com.polidea.flutter_ble_lib.delegate.DeviceConnectionDelegate;
 import com.polidea.flutter_ble_lib.delegate.DevicesDelegate;
-import com.polidea.flutter_ble_lib.delegate.LogLevelDelegate;
 import com.polidea.flutter_ble_lib.delegate.DiscoveryDelegate;
+import com.polidea.flutter_ble_lib.delegate.LogLevelDelegate;
 import com.polidea.flutter_ble_lib.delegate.MtuDelegate;
 import com.polidea.flutter_ble_lib.delegate.RssiDelegate;
 import com.polidea.flutter_ble_lib.event.AdapterStateStreamHandler;
@@ -29,10 +31,6 @@ import com.polidea.multiplatformbleadapter.OnEventCallback;
 import com.polidea.multiplatformbleadapter.ScanResult;
 import com.polidea.multiplatformbleadapter.errors.BleError;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import androidx.annotation.NonNull;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
@@ -42,7 +40,9 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import io.flutter.plugin.common.PluginRegistry.Registrar;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class FlutterBleLibPlugin implements MethodCallHandler, FlutterPlugin, ActivityAware {
 
@@ -68,13 +68,7 @@ public class FlutterBleLibPlugin implements MethodCallHandler, FlutterPlugin, Ac
         return plugin;
     }
 
-    /**
-     * Initializes the plugin.
-     *
-     * @param context       registrar.context() or binding.getApplicationContext()
-     * @param messenger     registrar.messenger() or binding.getBinaryMessenger()
-     */
-    private static void init(Context context, BinaryMessenger messenger, Activity activity) {
+    private void init(Context context, BinaryMessenger messenger, Activity activity) {
         channel = new MethodChannel(messenger, ChannelName.FLUTTER_BLE_LIB);
 
         final EventChannel bluetoothStateChannel = new EventChannel(messenger, ChannelName.ADAPTER_STATE_CHANGES);
@@ -92,10 +86,6 @@ public class FlutterBleLibPlugin implements MethodCallHandler, FlutterPlugin, Ac
         restoreStateChannel.setStreamHandler(plugin.restoreStateStreamHandler);
         connectionStateChannel.setStreamHandler(plugin.connectionStateStreamHandler);
         characteristicMonitorChannel.setStreamHandler(plugin.characteristicsMonitorStreamHandler);
-    }
-
-    public static void registerWith(Registrar registrar) {
-        init(registrar.context(), registrar.messenger(), registrar.activity());
     }
 
     private void setupAdapter(Context context) {
@@ -214,8 +204,6 @@ public class FlutterBleLibPlugin implements MethodCallHandler, FlutterPlugin, Ac
         result.success(null);
     }
 
-    // FlutterPlugin interface:
-
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
         init(binding.getApplicationContext(), binding.getBinaryMessenger(), null);
@@ -225,8 +213,6 @@ public class FlutterBleLibPlugin implements MethodCallHandler, FlutterPlugin, Ac
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
         channel.setMethodCallHandler(null);
     }
-
-    // ActivityAware interface:
 
     @Override
     public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
